@@ -28,7 +28,7 @@ export default function ProductsPage() {
     const load = async () => {
       setLoading(true);
       try {
-        const data = await getProducts();
+        const data = await getProducts({ minStock: 1 });
         if (active) {
           setProducts(data);
         }

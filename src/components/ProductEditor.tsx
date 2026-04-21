@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { ChangeEvent, FormEvent } from "react";
 import type { ProductInput, ProductStatus } from "../lib/products";
-import { PRODUCT_STATUSES, formatPrice } from "../lib/products";
+import { PRODUCT_CATEGORIES, PRODUCT_STATUSES, formatPrice } from "../lib/products";
 import { fileToDataUrl } from "../lib/media";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -49,6 +49,17 @@ export function ProductEditor({
     setForm(initialValues);
     setImageError(false);
   }, [initialValues]);
+
+  const categoryOptions = useMemo(() => {
+    const options = new Set(PRODUCT_CATEGORIES);
+    const current = form.category.trim();
+
+    if (current && !options.has(current)) {
+      options.add(current);
+    }
+
+    return Array.from(options);
+  }, [form.category]);
 
   const updateField =
     (key: keyof ProductFormValues) =>
@@ -190,13 +201,18 @@ export function ProductEditor({
             <Label htmlFor="category" className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
               Category
             </Label>
-            <Input
+            <select
               id="category"
-              value={form.category}
+              value={form.category.trim() || "General"}
               onChange={updateField("category")}
-              placeholder="Accessories"
-              className="h-11 rounded border-border bg-card px-4"
-            />
+              className="h-11 w-full rounded border border-border bg-card px-4 text-sm text-foreground outline-none transition-colors focus:border-gold"
+            >
+              {categoryOptions.map((category) => (
+                <option key={category} value={category}>
+                  {category}
+                </option>
+              ))}
+            </select>
           </div>
           <div className="space-y-2">
             <Label htmlFor="status" className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground">

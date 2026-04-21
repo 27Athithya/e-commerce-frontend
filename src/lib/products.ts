@@ -3,6 +3,20 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 export const PRODUCT_STATUSES = ["draft", "active", "archived"] as const;
 export type ProductStatus = (typeof PRODUCT_STATUSES)[number];
 
+export const PRODUCT_CATEGORIES = [
+  "General",
+  "Electronics",
+  "Gadgets",
+  "Accessories",
+  "Apparel",
+  "Fitness",
+  "Footwear",
+  "Home",
+  "Kitchen",
+  "Office",
+  "Travel",
+] as const;
+
 export type Product = {
   id: string;
   name: string;
@@ -23,6 +37,7 @@ export type ProductFilters = {
   status?: ProductStatus | "all";
   minPrice?: string;
   maxPrice?: string;
+  minStock?: number;
 };
 
 type ProductApiShape = Partial<Product> & {
@@ -55,6 +70,10 @@ function buildQueryString(filters?: ProductFilters) {
 
   if (filters.maxPrice?.trim()) {
     searchParams.set("maxPrice", filters.maxPrice.trim());
+  }
+
+  if (typeof filters.minStock === "number" && Number.isFinite(filters.minStock)) {
+    searchParams.set("minStock", String(filters.minStock));
   }
 
   const query = searchParams.toString();

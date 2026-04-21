@@ -34,7 +34,7 @@ export default function AddProductPage() {
               description: "",
               price: "",
               image: "",
-              category: "",
+              category: "General",
               stockQuantity: "0",
               status: "active",
             }}

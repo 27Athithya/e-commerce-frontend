@@ -73,7 +73,7 @@ export default function HomePage() {
 
     const load = async () => {
       try {
-        const data = await getProducts({ status: "active" });
+        const data = await getProducts({ minStock: 1 });
         if (active) {
           setProducts(data.slice(0, 4));
         }
@@ -297,9 +297,6 @@ export default function HomePage() {
                     <h3 className="font-serif text-2xl text-foreground transition-colors group-hover:text-gold">
                       {product.name}
                     </h3>
-                    <p className="mt-1 text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
-                      Stock {product.stockQuantity}
-                    </p>
                   </div>
                   <div className="font-serif text-xl text-foreground">{formatPrice(product.price)}</div>
                 </div>

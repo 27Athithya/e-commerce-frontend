@@ -10,6 +10,7 @@ import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import { Toaster } from "../../components/ui/sonner";
 import {
+  PRODUCT_CATEGORIES,
   PRODUCT_STATUSES,
   addProduct,
   deleteProduct,
@@ -43,7 +44,7 @@ const defaultAddForm: AddProductForm = {
   description: "",
   price: "",
   image: "",
-  category: "",
+  category: "General",
   stockQuantity: "0",
   status: "active",
 };
@@ -105,6 +106,7 @@ export default function InventoryPage() {
       (sum, product) => sum + (product.stockQuantity || 0) * product.price,
       0,
     );
+    const outOfStockCount = products.filter((product) => product.stockQuantity === 0).length;
     const lowCount = products.filter(
       (product) => product.stockQuantity > 0 && product.stockQuantity <= 10,
     ).length;
@@ -113,6 +115,7 @@ export default function InventoryPage() {
       skuCount: products.length,
       totalUnits,
       totalValue,
+      outOfStockCount,
       lowCount,
     };
   }, [products]);
@@ -294,17 +297,23 @@ export default function InventoryPage() {
             </Button>
           </div>
 
-          <div className="mb-12 grid grid-cols-2 gap-4 lg:grid-cols-4 lg:gap-6">
+          <div className="mb-12 grid grid-cols-2 gap-4 lg:grid-cols-5 lg:gap-6">
             {[
               { icon: Boxes, label: "SKUs", value: stats.skuCount.toString() },
               { icon: Package, label: "Units in stock", value: stats.totalUnits.toString() },
-              { icon: TrendingUp, label: "Catalog value", value: formatPrice(stats.totalValue) },
+              {
+                icon: AlertTriangle,
+                label: "Out of stock",
+                value: stats.outOfStockCount.toString(),
+                warn: stats.outOfStockCount > 0,
+              },
               {
                 icon: AlertTriangle,
                 label: "Low stock",
                 value: stats.lowCount.toString(),
                 warn: stats.lowCount > 0,
               },
+              { icon: TrendingUp, label: "Catalog value", value: formatPrice(stats.totalValue) },
             ].map((item) => (
               <div key={item.label} className="rounded-md border border-border bg-card p-6 shadow-soft">
                 <item.icon className={`h-5 w-5 ${item.warn ? "text-destructive" : "text-gold"}`} />
@@ -379,7 +388,20 @@ export default function InventoryPage() {
                       return (
                         <tr key={product.id} className="border-t border-border transition-colors hover:bg-muted/30">
                           <td className="px-5 py-4">
-                            <div className="font-serif text-xl text-foreground">{product.name}</div>
+                            <div className="flex items-center gap-4">
+                              <div className="h-12 w-12 overflow-hidden rounded bg-muted">
+                                <img
+                                  src={product.image || fallbackImage}
+                                  alt={product.name}
+                                  loading="lazy"
+                                  className="h-full w-full object-cover"
+                                  onError={(event) => {
+                                    (event.currentTarget as HTMLImageElement).src = fallbackImage;
+                                  }}
+                                />
+                              </div>
+                              <div className="font-serif text-xl text-foreground">{product.name}</div>
+                            </div>
                           </td>
                           <td className="px-5 py-4 text-muted-foreground">{product.category}</td>
                           <td className="px-5 py-4 text-right font-serif text-base text-foreground">
@@ -528,12 +550,18 @@ export default function InventoryPage() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="add-category">Category</Label>
-                  <Input
+                  <select
                     id="add-category"
-                    value={addForm.category}
+                    value={addForm.category || "General"}
                     onChange={(event) => setAddForm((current) => ({ ...current, category: event.target.value }))}
-                    placeholder="General"
-                  />
+                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                  >
+                    {PRODUCT_CATEGORIES.map((category) => (
+                      <option key={category} value={category}>
+                        {category}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
 
