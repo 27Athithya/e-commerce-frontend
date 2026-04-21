@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Boxes, Pencil, Plus, Trash2, X } from "lucide-react";
+import { AlertTriangle, Boxes, Package, Pencil, Plus, Search, Trash2, TrendingUp, X } from "lucide-react";
+import { PageFooter } from "../../components/PageFooter";
+import { PageHeader } from "../../components/PageHeader";
 import { SiteHeader } from "../../components/SiteHeader";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
@@ -60,6 +62,8 @@ function toForm(product: Product): EditableForm {
 export default function InventoryPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [query, setQuery] = useState("");
+  const [stockFilter, setStockFilter] = useState<"all" | "low" | "out">("all");
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [form, setForm] = useState<EditableForm | null>(null);
   const [isAdding, setIsAdding] = useState(false);
@@ -95,10 +99,47 @@ export default function InventoryPage() {
     };
   }, []);
 
-  const totalStock = useMemo(
-    () => products.reduce((sum, product) => sum + (product.stockQuantity || 0), 0),
-    [products],
-  );
+  const stats = useMemo(() => {
+    const totalUnits = products.reduce((sum, product) => sum + (product.stockQuantity || 0), 0);
+    const totalValue = products.reduce(
+      (sum, product) => sum + (product.stockQuantity || 0) * product.price,
+      0,
+    );
+    const lowCount = products.filter(
+      (product) => product.stockQuantity > 0 && product.stockQuantity <= 10,
+    ).length;
+
+    return {
+      skuCount: products.length,
+      totalUnits,
+      totalValue,
+      lowCount,
+    };
+  }, [products]);
+
+  const filteredProducts = useMemo(() => {
+    const value = query.trim().toLowerCase();
+
+    return products.filter((product) => {
+      if (
+        value &&
+        !product.name.toLowerCase().includes(value) &&
+        !product.category.toLowerCase().includes(value)
+      ) {
+        return false;
+      }
+
+      if (stockFilter === "low" && product.stockQuantity > 10) {
+        return false;
+      }
+
+      if (stockFilter === "out" && product.stockQuantity > 0) {
+        return false;
+      }
+
+      return true;
+    });
+  }, [products, query, stockFilter]);
 
   const openEditModal = (product: Product) => {
     setEditingProduct(product);
@@ -229,82 +270,173 @@ export default function InventoryPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       <SiteHeader />
       <Toaster />
 
-      <main className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
-        <div className="mb-8 flex flex-wrap items-end justify-between gap-4 rounded-3xl border border-border/80 bg-white/70 p-6 shadow-[var(--shadow-soft)] backdrop-blur">
-          <div>
-            <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">Inventory Management</h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {products.length} products · {totalStock} total units in stock
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="inline-flex items-center gap-2 rounded-full border border-amber-200/70 bg-amber-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.15em] text-amber-700">
-              <Boxes className="h-3.5 w-3.5" /> Admin View
+      <main>
+        <PageHeader
+          eyebrow="Atelier"
+          title="Inventory"
+          subtitle="Monitor stock health, catalog value, and critical low inventory from one operations view."
+        />
+
+        <div className="mx-auto max-w-[1400px] px-4 pb-24 sm:px-6 lg:px-10">
+          <div className="mb-10 flex flex-wrap items-center justify-between gap-4">
+            <div className="inline-flex items-center gap-2 rounded-full border border-gold/40 bg-gold/10 px-4 py-2 text-[10px] uppercase tracking-[0.2em] text-gold">
+              <Boxes className="h-3.5 w-3.5" /> Admin view
             </div>
-            <Button className="rounded-full" onClick={openAddModal}>
-              <Plus className="mr-1.5 h-4 w-4" /> Add Product
+            <Button
+              className="h-auto bg-foreground px-6 py-3 text-[10px] uppercase tracking-[0.25em] text-background transition-colors hover:bg-gold hover:text-primary-foreground"
+              onClick={openAddModal}
+            >
+              <Plus className="h-4 w-4" /> Add product
             </Button>
           </div>
-        </div>
 
-        {loading ? (
-          <div className="rounded-[1.5rem] border border-dashed border-border p-12 text-center text-muted-foreground">
-            Loading inventory...
+          <div className="mb-12 grid grid-cols-2 gap-4 lg:grid-cols-4 lg:gap-6">
+            {[
+              { icon: Boxes, label: "SKUs", value: stats.skuCount.toString() },
+              { icon: Package, label: "Units in stock", value: stats.totalUnits.toString() },
+              { icon: TrendingUp, label: "Catalog value", value: formatPrice(stats.totalValue) },
+              {
+                icon: AlertTriangle,
+                label: "Low stock",
+                value: stats.lowCount.toString(),
+                warn: stats.lowCount > 0,
+              },
+            ].map((item) => (
+              <div key={item.label} className="rounded-md border border-border bg-card p-6 shadow-soft">
+                <item.icon className={`h-5 w-5 ${item.warn ? "text-destructive" : "text-gold"}`} />
+                <div className="mt-4 font-serif text-3xl text-foreground lg:text-4xl">{item.value}</div>
+                <div className="mt-2 text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
+                  {item.label}
+                </div>
+              </div>
+            ))}
           </div>
-        ) : (
-          <div className="overflow-hidden rounded-[1.5rem] border border-border/80 bg-card shadow-[var(--shadow-soft)]">
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[720px] text-left text-sm">
-                <thead className="bg-amber-50 text-xs uppercase tracking-wider text-muted-foreground">
-                  <tr>
-                    <th className="px-4 py-3">Product Name</th>
-                    <th className="px-4 py-3">Price (LKR)</th>
-                    <th className="px-4 py-3">Quantity / Stock</th>
-                    <th className="px-4 py-3">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {products.map((product) => (
-                    <tr key={product.id} className="border-t border-border/70 transition hover:bg-muted/30">
-                      <td className="px-4 py-4 font-medium">{product.name}</td>
-                      <td className="px-4 py-4 font-semibold text-amber-700">{formatPrice(product.price)}</td>
-                      <td className="px-4 py-4">{product.stockQuantity} units</td>
-                      <td className="px-4 py-4">
-                        <div className="flex items-center gap-2">
-                          <Button
-                            size="icon"
-                            variant="outline"
-                            aria-label={`Edit ${product.name}`}
-                            className="h-8 w-8 rounded-full border-amber-200 text-amber-700 hover:bg-amber-50"
-                            onClick={() => openEditModal(product)}
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            size="icon"
-                            variant="outline"
-                            aria-label={`Delete ${product.name}`}
-                            className="h-8 w-8 rounded-full border-rose-200 text-rose-700 hover:bg-rose-50"
-                            onClick={() => {
-                              void handleDelete(product);
-                            }}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+
+          <div className="overflow-hidden rounded-md border border-border bg-card shadow-soft">
+            <div className="flex flex-col gap-4 border-b border-border p-5 md:flex-row md:items-center md:justify-between">
+              <div className="relative flex-1 md:max-w-md">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  placeholder="Search by product name or category..."
+                  className="w-full rounded border border-border bg-transparent py-2.5 pl-10 pr-4 text-sm outline-none transition-colors focus:border-gold"
+                />
+              </div>
+
+              <div className="flex gap-2">
+                {(["all", "low", "out"] as const).map((item) => (
+                  <button
+                    key={item}
+                    onClick={() => setStockFilter(item)}
+                    className={`rounded-full border px-4 py-2 text-[10px] uppercase tracking-[0.25em] transition-colors ${
+                      stockFilter === item
+                        ? "border-foreground bg-foreground text-background"
+                        : "border-border text-muted-foreground hover:border-foreground hover:text-foreground"
+                    }`}
+                  >
+                    {item === "all" ? "All" : item === "low" ? "Low stock" : "Out of stock"}
+                  </button>
+                ))}
+              </div>
             </div>
+
+            {loading ? (
+              <div className="p-14 text-center text-muted-foreground">Loading inventory...</div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[820px] text-sm">
+                  <thead>
+                    <tr className="bg-muted/40 text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
+                      <th className="px-5 py-4 text-left font-medium">Product</th>
+                      <th className="px-5 py-4 text-left font-medium">Category</th>
+                      <th className="px-5 py-4 text-right font-medium">Price</th>
+                      <th className="px-5 py-4 text-right font-medium">Stock</th>
+                      <th className="px-5 py-4 text-right font-medium">Status</th>
+                      <th className="px-5 py-4 text-right font-medium">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredProducts.map((product) => {
+                      const statusText =
+                        product.stockQuantity === 0
+                          ? "Out of stock"
+                          : product.stockQuantity <= 10
+                            ? "Low stock"
+                            : "In stock";
+
+                      const statusClass =
+                        product.stockQuantity === 0
+                          ? "bg-destructive/10 text-destructive"
+                          : product.stockQuantity <= 10
+                            ? "bg-gold/15 text-gold"
+                            : "bg-foreground/5 text-foreground";
+
+                      return (
+                        <tr key={product.id} className="border-t border-border transition-colors hover:bg-muted/30">
+                          <td className="px-5 py-4">
+                            <div className="font-serif text-xl text-foreground">{product.name}</div>
+                          </td>
+                          <td className="px-5 py-4 text-muted-foreground">{product.category}</td>
+                          <td className="px-5 py-4 text-right font-serif text-base text-foreground">
+                            {formatPrice(product.price)}
+                          </td>
+                          <td className="px-5 py-4 text-right font-medium">{product.stockQuantity}</td>
+                          <td className="px-5 py-4 text-right">
+                            <span
+                              className={`inline-block rounded-full px-3 py-1 text-[10px] uppercase tracking-[0.2em] ${statusClass}`}
+                            >
+                              {statusText}
+                            </span>
+                          </td>
+                          <td className="px-5 py-4">
+                            <div className="flex items-center justify-end gap-2">
+                              <Button
+                                size="icon"
+                                variant="outline"
+                                aria-label={`Edit ${product.name}`}
+                                className="h-8 w-8 rounded-full"
+                                onClick={() => openEditModal(product)}
+                              >
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                size="icon"
+                                variant="outline"
+                                aria-label={`Delete ${product.name}`}
+                                className="h-8 w-8 rounded-full"
+                                onClick={() => {
+                                  void handleDelete(product);
+                                }}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+
+                    {filteredProducts.length === 0 ? (
+                      <tr>
+                        <td colSpan={6} className="px-5 py-16 text-center text-muted-foreground">
+                          No products match your filters.
+                        </td>
+                      </tr>
+                    ) : null}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </main>
+
+      <PageFooter />
 
       {editingProduct && form ? (
         <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/45 p-4 backdrop-blur-sm">

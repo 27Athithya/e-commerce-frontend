@@ -1,22 +1,23 @@
 import type { Metadata } from "next";
-import { Manrope, Space_Grotesk } from "next/font/google";
+import { Cormorant_Garamond, Inter } from "next/font/google";
 import "./globals.css";
 
-const bodyFont = Manrope({
+const bodyFont = Inter({
   subsets: ["latin"],
-  variable: "--font-body",
+  variable: "--font-sans",
   display: "swap",
 });
 
-const headingFont = Space_Grotesk({
+const headingFont = Cormorant_Garamond({
   subsets: ["latin"],
-  variable: "--font-heading",
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-serif",
   display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "ShoppyGo",
-  description: "ShoppyGo is a modern ecommerce experience for browsing products, managing cart, and handling inventory.",
+  title: "ShoppyGo Atelier",
+  description: "A refined ecommerce experience for curated products, inventory operations, and seamless checkout.",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

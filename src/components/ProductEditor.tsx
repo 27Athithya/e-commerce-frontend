@@ -117,32 +117,41 @@ export function ProductEditor({
   const previewImage = form.image.trim() || fallbackPreview;
 
   return (
-    <section className="grid gap-8 lg:grid-cols-[1.15fr_0.85fr]">
+    <section className="grid gap-10 lg:grid-cols-[1.15fr_0.85fr]">
       <form
         onSubmit={(event) => {
           void handleSubmit(event);
         }}
-        className="space-y-6 rounded-[2rem] border border-border/70 bg-card p-6 shadow-[var(--shadow-elevated)] sm:p-8"
+        className="space-y-6 rounded-md border border-border bg-card p-6 shadow-luxury sm:p-8"
       >
-        <div className="space-y-2">
-          <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{heading}</h1>
-          <p className="max-w-2xl text-sm text-muted-foreground">{intro}</p>
+        <div className="space-y-3">
+          <div className="flex items-center gap-3">
+            <div className="h-px w-10 bg-gold" />
+            <span className="text-[10px] uppercase tracking-[0.3em] text-gold">Catalog form</span>
+          </div>
+          <h2 className="font-serif text-4xl tracking-tight text-foreground sm:text-5xl">{heading}</h2>
+          <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">{intro}</p>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="name">Product name *</Label>
+          <Label htmlFor="name" className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
+            Product name
+          </Label>
           <Input
             id="name"
             value={form.name}
             onChange={updateField("name")}
-            placeholder="e.g. Minimal Leather Wallet"
+            placeholder="e.g. Signature Leather Wallet"
             required
+            className="h-11 rounded border-border bg-card px-4"
           />
         </div>
 
         <div className="grid gap-6 sm:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="price">Price (LKR) *</Label>
+            <Label htmlFor="price" className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
+              Price (LKR)
+            </Label>
             <Input
               id="price"
               type="number"
@@ -152,10 +161,16 @@ export function ProductEditor({
               onChange={updateField("price")}
               placeholder="79.00"
               required
+              className="h-11 rounded border-border bg-card px-4"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="stockQuantity">Stock quantity *</Label>
+            <Label
+              htmlFor="stockQuantity"
+              className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground"
+            >
+              Stock quantity
+            </Label>
             <Input
               id="stockQuantity"
               type="number"
@@ -165,27 +180,33 @@ export function ProductEditor({
               onChange={updateField("stockQuantity")}
               placeholder="12"
               required
+              className="h-11 rounded border-border bg-card px-4"
             />
           </div>
         </div>
 
         <div className="grid gap-6 sm:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="category">Category</Label>
+            <Label htmlFor="category" className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
+              Category
+            </Label>
             <Input
               id="category"
               value={form.category}
               onChange={updateField("category")}
               placeholder="Accessories"
+              className="h-11 rounded border-border bg-card px-4"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="status">Status</Label>
+            <Label htmlFor="status" className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
+              Status
+            </Label>
             <select
               id="status"
               value={form.status}
               onChange={updateField("status")}
-              className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+              className="h-11 w-full rounded border border-border bg-card px-4 text-sm text-foreground outline-none transition-colors focus:border-gold"
             >
               {PRODUCT_STATUSES.map((status) => (
                 <option key={status} value={status}>
@@ -197,11 +218,20 @@ export function ProductEditor({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="image">Upload image or paste URL</Label>
-          <Input id="image" type="url" value={form.image} onChange={updateField("image")} placeholder="https://..." />
-          <div className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
+          <Label htmlFor="image" className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
+            Upload image or paste URL
+          </Label>
+          <Input
+            id="image"
+            type="url"
+            value={form.image}
+            onChange={updateField("image")}
+            placeholder="https://..."
+            className="h-11 rounded border-border bg-card px-4"
+          />
+          <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground">
             <span>Use a public URL or upload a local image file.</span>
-            <label className="cursor-pointer rounded-full border border-border px-3 py-1.5 font-medium text-foreground transition-colors hover:bg-accent">
+            <label className="cursor-pointer rounded-full border border-border px-4 py-2 text-[10px] uppercase tracking-[0.2em] text-foreground transition-colors hover:border-gold hover:text-gold">
               Upload file
               <input className="hidden" type="file" accept="image/*" onChange={handleFile} />
             </label>
@@ -210,7 +240,12 @@ export function ProductEditor({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="description">Description *</Label>
+          <Label
+            htmlFor="description"
+            className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground"
+          >
+            Description
+          </Label>
           <Textarea
             id="description"
             rows={5}
@@ -218,31 +253,36 @@ export function ProductEditor({
             onChange={updateField("description")}
             placeholder="Tell customers what makes this product special..."
             required
+            className="rounded border-border bg-card px-4 py-3"
           />
         </div>
 
-        <div className="flex items-center justify-end gap-3 pt-2">
-          <Button type="button" variant="ghost" onClick={onCancel} className="rounded-full">
+        <div className="flex items-center justify-end gap-3 border-t border-border pt-4">
+          <Button type="button" variant="outline" onClick={onCancel} className="rounded px-5">
             Cancel
           </Button>
-          <Button type="submit" disabled={submitting} className="rounded-full">
+          <Button
+            type="submit"
+            disabled={submitting}
+            className="h-auto bg-foreground px-6 py-3 text-[10px] uppercase tracking-[0.25em] text-background transition-colors hover:bg-gold hover:text-primary-foreground"
+          >
             {submitting ? "Saving..." : submitLabel}
           </Button>
         </div>
       </form>
 
-      <aside className="space-y-4 rounded-[2rem] border border-border/70 bg-card/80 p-4 shadow-[var(--shadow-soft)] sm:p-6">
+      <aside className="space-y-5 rounded-md border border-border bg-card/80 p-4 shadow-soft sm:p-6">
         <div className="space-y-1">
-          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-muted-foreground">
-            Live preview
-          </p>
-          <h2 className="text-xl font-semibold tracking-tight">{form.name.trim() || "Product preview"}</h2>
+          <p className="text-[10px] uppercase tracking-[0.3em] text-gold">Live preview</p>
+          <h3 className="font-serif text-3xl tracking-tight text-foreground">
+            {form.name.trim() || "Product preview"}
+          </h3>
           <p className="text-sm text-muted-foreground">
-            {form.category.trim() || "General"} · {form.status}
+            {form.category.trim() || "General"} - {form.status}
           </p>
         </div>
 
-        <div className="overflow-hidden rounded-[1.5rem] border border-border bg-muted">
+        <div className="overflow-hidden rounded border border-border bg-muted">
           <img
             src={previewImage}
             alt={form.name.trim() || "Product preview"}
@@ -254,17 +294,13 @@ export function ProductEditor({
         </div>
 
         <div className="grid gap-3 text-sm text-muted-foreground sm:grid-cols-2">
-          <div className="rounded-2xl border border-border bg-background/80 p-4">
-            <div className="text-xs uppercase tracking-wider">Price</div>
-            <div className="mt-2 text-base font-semibold text-foreground">
-              {formatPrice(Number(form.price) || 0)}
-            </div>
+          <div className="rounded border border-border bg-background/80 p-4">
+            <div className="text-[10px] uppercase tracking-[0.2em]">Price</div>
+            <div className="mt-2 font-serif text-2xl text-foreground">{formatPrice(Number(form.price) || 0)}</div>
           </div>
-          <div className="rounded-2xl border border-border bg-background/80 p-4">
-            <div className="text-xs uppercase tracking-wider">Stock</div>
-            <div className="mt-2 text-base font-semibold text-foreground">
-              {form.stockQuantity.trim() || "0"} units
-            </div>
+          <div className="rounded border border-border bg-background/80 p-4">
+            <div className="text-[10px] uppercase tracking-[0.2em]">Stock</div>
+            <div className="mt-2 font-serif text-2xl text-foreground">{form.stockQuantity.trim() || "0"}</div>
           </div>
         </div>
       </aside>

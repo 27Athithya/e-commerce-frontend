@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { PageFooter } from "../../../../components/PageFooter";
+import { PageHeader } from "../../../../components/PageHeader";
 import { ProductEditor, type ProductFormValues } from "../../../../components/ProductEditor";
 import { SiteHeader } from "../../../../components/SiteHeader";
 import { Button } from "../../../../components/ui/button";
@@ -60,52 +62,62 @@ export default function EditProductPage() {
     return () => {
       active = false;
     };
-  }, [id, router]);
+  }, [id]);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       <SiteHeader />
       <Toaster />
 
-      <main className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
-        {loading ? (
-          <div className="rounded-[1.75rem] border border-dashed border-border p-16 text-center text-muted-foreground">
-            Loading product...
-          </div>
-        ) : loadError || !product ? (
-          <div className="rounded-[1.75rem] border border-dashed border-border p-16 text-center">
-            <p className="text-muted-foreground">{loadError ?? "Product could not be loaded."}</p>
-            <div className="mt-4 flex items-center justify-center gap-3">
-              <Button variant="outline" onClick={() => router.push("/products")}>
-                Back to products
-              </Button>
-              <Button onClick={() => router.push("/add-product")}>Add new product</Button>
-            </div>
-          </div>
-        ) : (
-          <ProductEditor
-            heading={`Edit ${product.name}`}
-            intro="Update any product field, including the image, status, and inventory count. Changes are saved immediately to MongoDB."
-            submitLabel="Save changes"
-            initialValues={product}
-            onSubmit={async (productInput) => {
-              if (!id) {
-                toast.error("Invalid product id");
-                return;
-              }
+      <main>
+        <PageHeader
+          eyebrow="Atelier"
+          title="Edit product"
+          subtitle="Adjust media, pricing, stock, and publishing status with a live preview before saving."
+        />
 
-              try {
-                await updateProduct(id, productInput);
-                toast.success("Product updated");
-                setTimeout(() => router.push("/products"), 400);
-              } catch {
-                toast.error("Could not update product");
-              }
-            }}
-            onCancel={() => router.push("/products")}
-          />
-        )}
+        <div className="mx-auto max-w-[1400px] px-4 pb-24 sm:px-6 lg:px-10">
+          {loading ? (
+            <div className="rounded-md border border-dashed border-border p-16 text-center text-muted-foreground">
+              Loading product...
+            </div>
+          ) : loadError || !product ? (
+            <div className="rounded-md border border-dashed border-border p-16 text-center">
+              <p className="text-muted-foreground">{loadError ?? "Product could not be loaded."}</p>
+              <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+                <Button variant="outline" onClick={() => router.push("/products")}>
+                  Back to products
+                </Button>
+                <Button onClick={() => router.push("/add-product")}>Add new product</Button>
+              </div>
+            </div>
+          ) : (
+            <ProductEditor
+              heading={`Edit ${product.name}`}
+              intro="Update any field and publish the latest catalog state with consistent branding and inventory metadata."
+              submitLabel="Save changes"
+              initialValues={product}
+              onSubmit={async (productInput) => {
+                if (!id) {
+                  toast.error("Invalid product id");
+                  return;
+                }
+
+                try {
+                  await updateProduct(id, productInput);
+                  toast.success("Product updated");
+                  setTimeout(() => router.push("/products"), 400);
+                } catch {
+                  toast.error("Could not update product");
+                }
+              }}
+              onCancel={() => router.push("/products")}
+            />
+          )}
+        </div>
       </main>
+
+      <PageFooter />
     </div>
   );
 }
