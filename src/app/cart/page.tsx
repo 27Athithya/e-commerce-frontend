@@ -61,7 +61,7 @@ export default function CartPage() {
             <div className="overflow-hidden rounded-[1.5rem] border border-border/80 bg-card shadow-[var(--shadow-soft)]">
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[680px] text-left text-sm">
-                  <thead className="bg-blue-50 text-xs uppercase tracking-wider text-muted-foreground">
+                  <thead className="bg-amber-50 text-xs uppercase tracking-wider text-muted-foreground">
                     <tr>
                       <th className="px-4 py-3">Product Name</th>
                       <th className="px-4 py-3">Quantity</th>
@@ -76,7 +76,7 @@ export default function CartPage() {
                         <td className="px-4 py-4">
                           <div className="inline-flex items-center rounded-full border border-border bg-white">
                             <button
-                              className="px-3 py-1 text-base text-blue-700"
+                              className="px-3 py-1 text-base text-amber-700"
                               aria-label={`Decrease quantity for ${item.name}`}
                               onClick={() => updateCartItemQuantity(item.productId, item.quantity - 1)}
                             >
@@ -84,7 +84,7 @@ export default function CartPage() {
                             </button>
                             <span className="min-w-10 text-center font-semibold">{item.quantity}</span>
                             <button
-                              className="px-3 py-1 text-base text-blue-700"
+                              className="px-3 py-1 text-base text-amber-700"
                               aria-label={`Increase quantity for ${item.name}`}
                               onClick={() => updateCartItemQuantity(item.productId, item.quantity + 1)}
                             >
@@ -93,7 +93,7 @@ export default function CartPage() {
                           </div>
                         </td>
                         <td className="px-4 py-4">{formatPrice(item.price)}</td>
-                        <td className="px-4 py-4 font-semibold text-blue-700">{formatPrice(item.price * item.quantity)}</td>
+                        <td className="px-4 py-4 font-semibold text-amber-700">{formatPrice(item.price * item.quantity)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -111,9 +111,9 @@ export default function CartPage() {
               </div>
               <div className="mt-4 flex items-center justify-between border-t border-border/70 pt-4">
                 <span className="text-base font-semibold">Total</span>
-                <span className="text-xl font-semibold text-blue-700">{formatPrice(subtotal)}</span>
+                <span className="text-xl font-semibold text-amber-700">{formatPrice(subtotal)}</span>
               </div>
-              <Button className="mt-5 w-full rounded-full bg-gradient-to-r from-blue-600 to-violet-600 text-white hover:opacity-95">
+              <Button className="mt-5 w-full rounded-full bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-white shadow-md shadow-orange-500/30 hover:opacity-95">
                 <CreditCard className="mr-1.5 h-4 w-4" /> Checkout
               </Button>
             </div>

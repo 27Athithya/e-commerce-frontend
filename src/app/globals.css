@@ -48,32 +48,32 @@
 
 :root {
   --radius: 0.875rem;
-  --background: oklch(0.986 0.01 245);
-  --foreground: oklch(0.26 0.04 255);
+  --background: oklch(0.985 0.012 80);
+  --foreground: oklch(0.24 0.035 45);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.26 0.04 255);
+  --card-foreground: oklch(0.24 0.035 45);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.26 0.04 255);
-  --primary: oklch(0.56 0.21 260);
+  --popover-foreground: oklch(0.24 0.035 45);
+  --primary: oklch(0.72 0.17 55);
   --primary-foreground: oklch(0.99 0 0);
-  --secondary: oklch(0.95 0.03 248);
-  --secondary-foreground: oklch(0.31 0.06 258);
-  --muted: oklch(0.95 0.02 248);
-  --muted-foreground: oklch(0.48 0.04 255);
-  --accent: oklch(0.93 0.04 250);
-  --accent-foreground: oklch(0.31 0.06 258);
+  --secondary: oklch(0.95 0.03 85);
+  --secondary-foreground: oklch(0.28 0.05 45);
+  --muted: oklch(0.95 0.02 90);
+  --muted-foreground: oklch(0.47 0.04 45);
+  --accent: oklch(0.92 0.05 85);
+  --accent-foreground: oklch(0.28 0.05 45);
   --gradient-hero:
-    radial-gradient(circle at 12% -4%, oklch(0.86 0.12 250 / 0.45) 0%, transparent 42%),
-    radial-gradient(circle at 92% -6%, oklch(0.84 0.14 290 / 0.28) 0%, transparent 38%),
-    linear-gradient(180deg, oklch(0.992 0.01 245) 0%, oklch(0.95 0.03 252) 100%);
+    radial-gradient(circle at 12% -4%, oklch(0.88 0.12 65 / 0.45) 0%, transparent 42%),
+    radial-gradient(circle at 92% -6%, oklch(0.82 0.08 190 / 0.24) 0%, transparent 38%),
+    linear-gradient(180deg, oklch(0.99 0.015 85) 0%, oklch(0.95 0.03 78) 100%);
   --shadow-soft: 0 2px 10px oklch(0.27 0.06 255 / 0.08), 0 20px 40px -28px oklch(0.28 0.08 260 / 0.25);
   --shadow-elevated: 0 8px 24px oklch(0.27 0.08 258 / 0.1), 0 42px 70px -34px oklch(0.28 0.11 260 / 0.35);
   --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.984 0.003 247.858);
-  --border: oklch(0.9 0.03 251);
-  --input: oklch(0.9 0.03 251);
-  --ring: oklch(0.65 0.12 258);
+  --border: oklch(0.9 0.03 80);
+  --input: oklch(0.9 0.03 80);
+  --ring: oklch(0.7 0.15 55);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -137,9 +137,9 @@
     min-height: 100vh;
     background-color: var(--color-background);
     background-image:
-      radial-gradient(circle at top left, oklch(0.9 0.09 248 / 0.25), transparent 34%),
-      radial-gradient(circle at top right, oklch(0.88 0.12 290 / 0.18), transparent 30%),
-      linear-gradient(180deg, oklch(0.992 0.01 245), oklch(0.965 0.02 252));
+      radial-gradient(circle at top left, oklch(0.9 0.1 70 / 0.25), transparent 34%),
+      radial-gradient(circle at top right, oklch(0.88 0.08 190 / 0.2), transparent 30%),
+      linear-gradient(180deg, oklch(0.99 0.015 85), oklch(0.965 0.02 80));
     color: var(--color-foreground);
     font-family: var(--font-body), "Trebuchet MS", "Segoe UI", sans-serif;
     text-rendering: optimizeLegibility;
@@ -162,4 +162,34 @@
     background: oklch(0.24 0.03 250 / 0.16);
     color: var(--foreground);
   }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.7s ease both;
+}
+
+.animate-fade-up-delay-1 {
+  animation: fade-up 0.7s ease both;
+  animation-delay: 120ms;
+}
+
+.animate-fade-up-delay-2 {
+  animation: fade-up 0.7s ease both;
+  animation-delay: 240ms;
+}
+
+.animate-fade-up-delay-3 {
+  animation: fade-up 0.7s ease both;
+  animation-delay: 360ms;
 }

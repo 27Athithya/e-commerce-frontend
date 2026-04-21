@@ -24,7 +24,7 @@ export default function ProductsPage() {
     const load = async () => {
       setLoading(true);
       try {
-        const data = await getProducts({ status: "active" });
+        const data = await getProducts();
         if (active) {
           setProducts(data);
         }
@@ -53,7 +53,7 @@ export default function ProductsPage() {
 
       <main className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
         <div className="mb-8 rounded-3xl border border-border/70 bg-white/70 p-6 shadow-[var(--shadow-soft)] backdrop-blur">
-          <span className="inline-flex items-center gap-2 rounded-full border border-blue-300/60 bg-blue-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-blue-700">
+          <span className="inline-flex items-center gap-2 rounded-full border border-amber-200/70 bg-amber-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-amber-700">
             <Sparkles className="h-3.5 w-3.5" /> Collection
           </span>
           <h1 className="mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">Shop All Products</h1>
@@ -92,9 +92,9 @@ export default function ProductsPage() {
                   <h2 className="text-lg font-semibold tracking-tight text-foreground">{product.name}</h2>
                   <p className="line-clamp-2 text-sm text-muted-foreground">{product.description}</p>
                   <div className="mt-auto flex items-center justify-between pt-2">
-                    <span className="text-lg font-semibold text-blue-700">{formatPrice(product.price)}</span>
+                    <span className="text-lg font-semibold text-amber-700">{formatPrice(product.price)}</span>
                     <Button
-                      className="rounded-full bg-gradient-to-r from-blue-600 to-violet-600 text-white shadow-md shadow-blue-400/30 hover:opacity-95"
+                      className="rounded-full bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-white shadow-md shadow-orange-500/30 hover:opacity-95"
                       onClick={() => {
                         addToCart(product);
                         toast.success(`${product.name} added to cart`);

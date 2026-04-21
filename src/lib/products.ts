@@ -25,6 +25,11 @@ export type ProductFilters = {
   maxPrice?: string;
 };
 
+type ProductApiShape = Partial<Product> & {
+  stock?: unknown;
+  createdAt?: unknown;
+};
+
 function buildQueryString(filters?: ProductFilters) {
   if (!filters) {
     return "";
@@ -64,7 +69,8 @@ export async function getProducts(filters?: ProductFilters): Promise<Product[]> 
     throw new Error("Failed to load products");
   }
 
-  return (await response.json()) as Product[];
+  const products = (await response.json()) as ProductApiShape[];
+  return products.map((product) => normalizeProduct(product));
 }
 
 export async function getProduct(id: string): Promise<Product> {
@@ -73,7 +79,8 @@ export async function getProduct(id: string): Promise<Product> {
     throw new Error("Failed to load product");
   }
 
-  return (await response.json()) as Product;
+  const product = (await response.json()) as ProductApiShape;
+  return normalizeProduct(product);
 }
 
 export async function addProduct(productInput: ProductInput): Promise<Product> {
@@ -128,4 +135,38 @@ export function formatPrice(amount: number) {
   return new Intl.NumberFormat("en-LK", { style: "currency", currency: "LKR", maximumFractionDigits: 2 }).format(
     amount,
   );
+}
+
+function normalizeProduct(product: ProductApiShape): Product {
+  const stockFromApi = product.stockQuantity ?? product.stock;
+  const numericStock = Number(stockFromApi);
+  const stockQuantity = Number.isFinite(numericStock) && numericStock > 0 ? Math.trunc(numericStock) : 0;
+
+  const createdAtRaw = product.createdAt;
+  const createdAtNumber =
+    typeof createdAtRaw === "number"
+      ? createdAtRaw
+      : typeof createdAtRaw === "string"
+        ? Date.parse(createdAtRaw)
+        : Number.NaN;
+
+  return {
+    id: String(product.id ?? ""),
+    name: String(product.name ?? ""),
+    description: String(product.description ?? ""),
+    price: Number(product.price ?? 0),
+    image: String(product.image ?? ""),
+    category: String(product.category ?? "General"),
+    stockQuantity,
+    status: normalizeStatus(product.status),
+    createdAt: Number.isFinite(createdAtNumber) ? createdAtNumber : Date.now(),
+  };
+}
+
+function normalizeStatus(status: unknown): ProductStatus {
+  if (status === "draft" || status === "active" || status === "archived") {
+    return status;
+  }
+
+  return "active";
 }
