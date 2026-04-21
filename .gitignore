@@ -19,3 +19,9 @@ pnpm-debug.log*
 # editor files
 .DS_Store
 .vscode
+
+# deployment artifacts
+.vercel
+
+# test artifacts
+coverage
