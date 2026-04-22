@@ -60,6 +60,13 @@ function toForm(product: Product): EditableForm {
   };
 }
 
+function formatStatNumber(value: number) {
+  return new Intl.NumberFormat("en-LK", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(value);
+}
+
 export default function InventoryPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -143,6 +150,24 @@ export default function InventoryPage() {
       return true;
     });
   }, [products, query, stockFilter]);
+
+  const statCards = [
+    { icon: Boxes, label: "SKUs", value: stats.skuCount.toString() },
+    { icon: Package, label: "Units in stock", value: stats.totalUnits.toString() },
+    {
+      icon: AlertTriangle,
+      label: "Out of stock",
+      value: stats.outOfStockCount.toString(),
+      warn: stats.outOfStockCount > 0,
+    },
+    {
+      icon: AlertTriangle,
+      label: "Low stock",
+      value: stats.lowCount.toString(),
+      warn: stats.lowCount > 0,
+    },
+    { icon: TrendingUp, label: "Catalog value", value: formatStatNumber(stats.totalValue) },
+  ];
 
   const openEditModal = (product: Product) => {
     setEditingProduct(product);
@@ -285,40 +310,26 @@ export default function InventoryPage() {
         />
 
         <div className="mx-auto max-w-[1400px] px-4 pb-24 sm:px-6 lg:px-10">
-          <div className="mb-10 flex flex-wrap items-center justify-between gap-4">
+          <div className="mb-10 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
             <div className="inline-flex items-center gap-2 rounded-full border border-gold/40 bg-gold/10 px-4 py-2 text-[10px] uppercase tracking-[0.2em] text-gold">
               <Boxes className="h-3.5 w-3.5" /> Admin view
             </div>
             <Button
-              className="h-auto bg-foreground px-6 py-3 text-[10px] uppercase tracking-[0.25em] text-background transition-colors hover:bg-gold hover:text-primary-foreground"
+              className="h-auto w-full bg-foreground px-6 py-3 text-[10px] uppercase tracking-[0.25em] text-background transition-colors hover:bg-gold hover:text-primary-foreground sm:w-auto"
               onClick={openAddModal}
             >
               <Plus className="h-4 w-4" /> Add product
             </Button>
           </div>
 
-          <div className="mb-12 grid grid-cols-2 gap-4 lg:grid-cols-5 lg:gap-6">
-            {[
-              { icon: Boxes, label: "SKUs", value: stats.skuCount.toString() },
-              { icon: Package, label: "Units in stock", value: stats.totalUnits.toString() },
-              {
-                icon: AlertTriangle,
-                label: "Out of stock",
-                value: stats.outOfStockCount.toString(),
-                warn: stats.outOfStockCount > 0,
-              },
-              {
-                icon: AlertTriangle,
-                label: "Low stock",
-                value: stats.lowCount.toString(),
-                warn: stats.lowCount > 0,
-              },
-              { icon: TrendingUp, label: "Catalog value", value: formatPrice(stats.totalValue) },
-            ].map((item) => (
-              <div key={item.label} className="rounded-md border border-border bg-card p-6 shadow-soft">
+          <div className="mb-12 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5 xl:gap-6">
+            {statCards.map((item) => (
+              <div key={item.label} className="rounded-md border border-border bg-card p-5 shadow-soft sm:p-6">
                 <item.icon className={`h-5 w-5 ${item.warn ? "text-destructive" : "text-gold"}`} />
-                <div className="mt-4 font-serif text-3xl text-foreground lg:text-4xl">{item.value}</div>
-                <div className="mt-2 text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
+                <div className="mt-4 min-w-0 whitespace-nowrap text-[clamp(1.25rem,1.8vw,2rem)] font-semibold leading-none tracking-tight text-foreground [font-variant-numeric:tabular-nums]">
+                  {item.value}
+                </div>
+                <div className="mt-3 text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
                   {item.label}
                 </div>
               </div>
@@ -326,8 +337,8 @@ export default function InventoryPage() {
           </div>
 
           <div className="overflow-hidden rounded-md border border-border bg-card shadow-soft">
-            <div className="flex flex-col gap-4 border-b border-border p-5 md:flex-row md:items-center md:justify-between">
-              <div className="relative flex-1 md:max-w-md">
+            <div className="flex flex-col gap-4 border-b border-border p-4 sm:p-5 md:flex-row md:items-center md:justify-between">
+              <div className="relative w-full flex-1 md:max-w-md">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <input
                   value={query}
@@ -337,7 +348,7 @@ export default function InventoryPage() {
                 />
               </div>
 
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 {(["all", "low", "out"] as const).map((item) => (
                   <button
                     key={item}
@@ -357,102 +368,187 @@ export default function InventoryPage() {
             {loading ? (
               <div className="p-14 text-center text-muted-foreground">Loading inventory...</div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[820px] text-sm">
-                  <thead>
-                    <tr className="bg-muted/40 text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
-                      <th className="px-5 py-4 text-left font-medium">Product</th>
-                      <th className="px-5 py-4 text-left font-medium">Category</th>
-                      <th className="px-5 py-4 text-right font-medium">Price</th>
-                      <th className="px-5 py-4 text-right font-medium">Stock</th>
-                      <th className="px-5 py-4 text-right font-medium">Status</th>
-                      <th className="px-5 py-4 text-right font-medium">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredProducts.map((product) => {
-                      const statusText =
-                        product.stockQuantity === 0
-                          ? "Out of stock"
-                          : product.stockQuantity <= 10
-                            ? "Low stock"
-                            : "In stock";
+              <>
+                <div className="grid gap-4 p-4 sm:p-5 lg:hidden">
+                  {filteredProducts.map((product) => {
+                    const statusText =
+                      product.stockQuantity === 0
+                        ? "Out of stock"
+                        : product.stockQuantity <= 10
+                          ? "Low stock"
+                          : "In stock";
 
-                      const statusClass =
-                        product.stockQuantity === 0
-                          ? "bg-destructive/10 text-destructive"
-                          : product.stockQuantity <= 10
-                            ? "bg-gold/15 text-gold"
-                            : "bg-foreground/5 text-foreground";
+                    const statusClass =
+                      product.stockQuantity === 0
+                        ? "bg-destructive/10 text-destructive"
+                        : product.stockQuantity <= 10
+                          ? "bg-gold/15 text-gold"
+                          : "bg-foreground/5 text-foreground";
 
-                      return (
-                        <tr key={product.id} className="border-t border-border transition-colors hover:bg-muted/30">
-                          <td className="px-5 py-4">
-                            <div className="flex items-center gap-4">
-                              <div className="h-12 w-12 overflow-hidden rounded bg-muted">
-                                <img
-                                  src={product.image || fallbackImage}
-                                  alt={product.name}
-                                  loading="lazy"
-                                  className="h-full w-full object-cover"
-                                  onError={(event) => {
-                                    (event.currentTarget as HTMLImageElement).src = fallbackImage;
-                                  }}
-                                />
+                    return (
+                      <article key={product.id} className="rounded-md border border-border bg-background/70 p-4 shadow-soft">
+                        <div className="flex items-start gap-4">
+                          <div className="h-16 w-16 shrink-0 overflow-hidden rounded bg-muted">
+                            <img
+                              src={product.image || fallbackImage}
+                              alt={product.name}
+                              loading="lazy"
+                              className="h-full w-full object-cover"
+                              onError={(event) => {
+                                (event.currentTarget as HTMLImageElement).src = fallbackImage;
+                              }}
+                            />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                              <div className="min-w-0">
+                                <div className="truncate font-serif text-xl text-foreground">{product.name}</div>
+                                <div className="mt-1 text-sm text-muted-foreground">{product.category}</div>
                               </div>
-                              <div className="font-serif text-xl text-foreground">{product.name}</div>
+                              <div className="font-serif text-lg text-foreground">{formatPrice(product.price)}</div>
                             </div>
-                          </td>
-                          <td className="px-5 py-4 text-muted-foreground">{product.category}</td>
-                          <td className="px-5 py-4 text-right font-serif text-base text-foreground">
-                            {formatPrice(product.price)}
-                          </td>
-                          <td className="px-5 py-4 text-right font-medium">{product.stockQuantity}</td>
-                          <td className="px-5 py-4 text-right">
-                            <span
-                              className={`inline-block rounded-full px-3 py-1 text-[10px] uppercase tracking-[0.2em] ${statusClass}`}
-                            >
-                              {statusText}
-                            </span>
-                          </td>
-                          <td className="px-5 py-4">
-                            <div className="flex items-center justify-end gap-2">
+
+                            <div className="mt-4 flex flex-wrap items-center gap-3">
+                              <span className="rounded-full bg-muted px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                                Stock {product.stockQuantity}
+                              </span>
+                              <span
+                                className={`inline-block rounded-full px-3 py-1 text-[10px] uppercase tracking-[0.2em] ${statusClass}`}
+                              >
+                                {statusText}
+                              </span>
+                            </div>
+
+                            <div className="mt-4 flex flex-wrap gap-2">
                               <Button
-                                size="icon"
                                 variant="outline"
-                                aria-label={`Edit ${product.name}`}
-                                className="h-8 w-8 rounded-full"
+                                className="rounded-full"
                                 onClick={() => openEditModal(product)}
                               >
-                                <Pencil className="h-4 w-4" />
+                                <Pencil className="h-4 w-4" /> Edit
                               </Button>
                               <Button
-                                size="icon"
                                 variant="outline"
-                                aria-label={`Delete ${product.name}`}
-                                className="h-8 w-8 rounded-full"
+                                className="rounded-full"
                                 onClick={() => {
                                   void handleDelete(product);
                                 }}
                               >
-                                <Trash2 className="h-4 w-4" />
+                                <Trash2 className="h-4 w-4" /> Delete
                               </Button>
                             </div>
+                          </div>
+                        </div>
+                      </article>
+                    );
+                  })}
+
+                  {filteredProducts.length === 0 ? (
+                    <div className="rounded-md border border-dashed border-border px-5 py-14 text-center text-muted-foreground">
+                      No products match your filters.
+                    </div>
+                  ) : null}
+                </div>
+
+                <div className="hidden overflow-x-auto lg:block">
+                  <table className="w-full min-w-[820px] text-sm">
+                    <thead>
+                      <tr className="bg-muted/40 text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
+                        <th className="px-5 py-4 text-left font-medium">Product</th>
+                        <th className="px-5 py-4 text-left font-medium">Category</th>
+                        <th className="px-5 py-4 text-right font-medium">Price</th>
+                        <th className="px-5 py-4 text-right font-medium">Stock</th>
+                        <th className="px-5 py-4 text-right font-medium">Status</th>
+                        <th className="px-5 py-4 text-right font-medium">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredProducts.map((product) => {
+                        const statusText =
+                          product.stockQuantity === 0
+                            ? "Out of stock"
+                            : product.stockQuantity <= 10
+                              ? "Low stock"
+                              : "In stock";
+
+                        const statusClass =
+                          product.stockQuantity === 0
+                            ? "bg-destructive/10 text-destructive"
+                            : product.stockQuantity <= 10
+                              ? "bg-gold/15 text-gold"
+                              : "bg-foreground/5 text-foreground";
+
+                        return (
+                          <tr key={product.id} className="border-t border-border transition-colors hover:bg-muted/30">
+                            <td className="px-5 py-4">
+                              <div className="flex items-center gap-4">
+                                <div className="h-12 w-12 overflow-hidden rounded bg-muted">
+                                  <img
+                                    src={product.image || fallbackImage}
+                                    alt={product.name}
+                                    loading="lazy"
+                                    className="h-full w-full object-cover"
+                                    onError={(event) => {
+                                      (event.currentTarget as HTMLImageElement).src = fallbackImage;
+                                    }}
+                                  />
+                                </div>
+                                <div className="max-w-[20rem] font-serif text-xl text-foreground [overflow-wrap:anywhere]">
+                                  {product.name}
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-5 py-4 text-muted-foreground">{product.category}</td>
+                            <td className="px-5 py-4 text-right font-serif text-base text-foreground">
+                              {formatPrice(product.price)}
+                            </td>
+                            <td className="px-5 py-4 text-right font-medium">{product.stockQuantity}</td>
+                            <td className="px-5 py-4 text-right">
+                              <span
+                                className={`inline-block rounded-full px-3 py-1 text-[10px] uppercase tracking-[0.2em] ${statusClass}`}
+                              >
+                                {statusText}
+                              </span>
+                            </td>
+                            <td className="px-5 py-4">
+                              <div className="flex items-center justify-end gap-2">
+                                <Button
+                                  size="icon"
+                                  variant="outline"
+                                  aria-label={`Edit ${product.name}`}
+                                  className="h-8 w-8 rounded-full"
+                                  onClick={() => openEditModal(product)}
+                                >
+                                  <Pencil className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  size="icon"
+                                  variant="outline"
+                                  aria-label={`Delete ${product.name}`}
+                                  className="h-8 w-8 rounded-full"
+                                  onClick={() => {
+                                    void handleDelete(product);
+                                  }}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+
+                      {filteredProducts.length === 0 ? (
+                        <tr>
+                          <td colSpan={6} className="px-5 py-16 text-center text-muted-foreground">
+                            No products match your filters.
                           </td>
                         </tr>
-                      );
-                    })}
-
-                    {filteredProducts.length === 0 ? (
-                      <tr>
-                        <td colSpan={6} className="px-5 py-16 text-center text-muted-foreground">
-                          No products match your filters.
-                        </td>
-                      </tr>
-                    ) : null}
-                  </tbody>
-                </table>
-              </div>
+                      ) : null}
+                    </tbody>
+                  </table>
+                </div>
+              </>
             )}
           </div>
         </div>
@@ -461,185 +557,191 @@ export default function InventoryPage() {
       <PageFooter />
 
       {editingProduct && form ? (
-        <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/45 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-lg rounded-3xl border border-border/80 bg-card p-6 shadow-[var(--shadow-elevated)]">
-            <div className="mb-5 flex items-center justify-between gap-3">
-              <div>
-                <h2 className="text-xl font-semibold tracking-tight">Edit Product</h2>
-                <p className="text-sm text-muted-foreground">Update name, price, and quantity.</p>
-              </div>
-              <Button size="icon" variant="ghost" className="h-8 w-8" onClick={closeEditModal} aria-label="Close">
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-
-            <div className="grid gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Product Name</Label>
-                <Input
-                  id="name"
-                  value={form.name}
-                  onChange={(event) => setForm((current) => (current ? { ...current, name: event.target.value } : current))}
-                />
-              </div>
-
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                <Label htmlFor="price">Price (LKR)</Label>
-                <Input
-                  id="price"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={form.price}
-                  onChange={(event) => setForm((current) => (current ? { ...current, price: event.target.value } : current))}
-                />
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/45 p-4 backdrop-blur-sm">
+          <div className="grid min-h-full place-items-center">
+            <div className="max-h-[calc(100vh-2rem)] w-full max-w-lg overflow-y-auto rounded-3xl border border-border/80 bg-card p-5 shadow-[var(--shadow-elevated)] sm:p-6">
+              <div className="mb-5 flex items-center justify-between gap-3">
+                <div>
+                  <h2 className="text-xl font-semibold tracking-tight">Edit Product</h2>
+                  <p className="text-sm text-muted-foreground">Update name, price, and quantity.</p>
                 </div>
+                <Button size="icon" variant="ghost" className="h-8 w-8" onClick={closeEditModal} aria-label="Close">
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
 
                 <div className="space-y-2">
-                <Label htmlFor="stock">Quantity / Stock</Label>
-                <Input
-                  id="stock"
-                  type="number"
-                  min="0"
-                  step="1"
-                  value={form.stockQuantity}
-                  onChange={(event) =>
-                    setForm((current) => (current ? { ...current, stockQuantity: event.target.value } : current))
-                  }
-                />
+                  <Label htmlFor="name">Product Name</Label>
+                  <Input
+                    id="name"
+                    value={form.name}
+                    onChange={(event) =>
+                      setForm((current) => (current ? { ...current, name: event.target.value } : current))
+                    }
+                  />
+                </div>
+
+                <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="price">Price (LKR)</Label>
+                    <Input
+                      id="price"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={form.price}
+                      onChange={(event) =>
+                        setForm((current) => (current ? { ...current, price: event.target.value } : current))
+                      }
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="stock">Quantity / Stock</Label>
+                    <Input
+                      id="stock"
+                      type="number"
+                      min="0"
+                      step="1"
+                      value={form.stockQuantity}
+                      onChange={(event) =>
+                        setForm((current) => (current ? { ...current, stockQuantity: event.target.value } : current))
+                      }
+                    />
+                  </div>
+                </div>
+
+                <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-end">
+                  <Button variant="ghost" className="rounded-full" onClick={closeEditModal}>
+                    Cancel
+                  </Button>
+                  <Button className="rounded-full" disabled={saving} onClick={() => void saveEdit()}>
+                    {saving ? "Saving..." : "Save changes"}
+                  </Button>
                 </div>
               </div>
             </div>
-
-            <div className="mt-6 flex items-center justify-end gap-3">
-              <Button variant="ghost" className="rounded-full" onClick={closeEditModal}>
-                Cancel
-              </Button>
-              <Button className="rounded-full" disabled={saving} onClick={() => void saveEdit()}>
-                {saving ? "Saving..." : "Save changes"}
-              </Button>
-            </div>
-          </div>
         </div>
       ) : null}
 
       {isAdding ? (
-        <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/45 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-2xl rounded-3xl border border-border/80 bg-card p-6 shadow-[var(--shadow-elevated)]">
-            <div className="mb-5 flex items-center justify-between gap-3">
-              <div>
-                <h2 className="text-xl font-semibold tracking-tight">Add Product</h2>
-                <p className="text-sm text-muted-foreground">Fill product model fields and save.</p>
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/45 p-4 backdrop-blur-sm">
+          <div className="grid min-h-full place-items-center">
+            <div className="max-h-[calc(100vh-2rem)] w-full max-w-2xl overflow-y-auto rounded-3xl border border-border/80 bg-card p-5 shadow-[var(--shadow-elevated)] sm:p-6">
+              <div className="mb-5 flex items-center justify-between gap-3">
+                <div>
+                  <h2 className="text-xl font-semibold tracking-tight">Add Product</h2>
+                  <p className="text-sm text-muted-foreground">Fill product model fields and save.</p>
+                </div>
+                <Button size="icon" variant="ghost" className="h-8 w-8" onClick={closeAddModal} aria-label="Close">
+                  <X className="h-4 w-4" />
+                </Button>
               </div>
-              <Button size="icon" variant="ghost" className="h-8 w-8" onClick={closeAddModal} aria-label="Close">
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
 
-            <div className="grid gap-4">
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-4">
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="add-name">Name *</Label>
+                    <Input
+                      id="add-name"
+                      value={addForm.name}
+                      onChange={(event) => setAddForm((current) => ({ ...current, name: event.target.value }))}
+                      placeholder="Product name"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="add-category">Category</Label>
+                    <select
+                      id="add-category"
+                      value={addForm.category || "General"}
+                      onChange={(event) => setAddForm((current) => ({ ...current, category: event.target.value }))}
+                      className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    >
+                      {PRODUCT_CATEGORIES.map((category) => (
+                        <option key={category} value={category}>
+                          {category}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
                 <div className="space-y-2">
-                  <Label htmlFor="add-name">Name *</Label>
-                  <Input
-                    id="add-name"
-                    value={addForm.name}
-                    onChange={(event) => setAddForm((current) => ({ ...current, name: event.target.value }))}
-                    placeholder="Product name"
+                  <Label htmlFor="add-description">Description *</Label>
+                  <textarea
+                    id="add-description"
+                    rows={4}
+                    value={addForm.description}
+                    onChange={(event) => setAddForm((current) => ({ ...current, description: event.target.value }))}
+                    className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    placeholder="Describe this product"
                   />
                 </div>
+
                 <div className="space-y-2">
-                  <Label htmlFor="add-category">Category</Label>
-                  <select
-                    id="add-category"
-                    value={addForm.category || "General"}
-                    onChange={(event) => setAddForm((current) => ({ ...current, category: event.target.value }))}
-                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                  >
-                    {PRODUCT_CATEGORIES.map((category) => (
-                      <option key={category} value={category}>
-                        {category}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="add-description">Description *</Label>
-                <textarea
-                  id="add-description"
-                  rows={4}
-                  value={addForm.description}
-                  onChange={(event) => setAddForm((current) => ({ ...current, description: event.target.value }))}
-                  className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                  placeholder="Describe this product"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="add-image">Image URL</Label>
-                <Input
-                  id="add-image"
-                  type="url"
-                  value={addForm.image}
-                  onChange={(event) => setAddForm((current) => ({ ...current, image: event.target.value }))}
-                  placeholder="https://..."
-                />
-              </div>
-
-              <div className="grid gap-4 sm:grid-cols-3">
-                <div className="space-y-2">
-                  <Label htmlFor="add-price">Price (LKR) *</Label>
+                  <Label htmlFor="add-image">Image URL</Label>
                   <Input
-                    id="add-price"
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={addForm.price}
-                    onChange={(event) => setAddForm((current) => ({ ...current, price: event.target.value }))}
+                    id="add-image"
+                    type="url"
+                    value={addForm.image}
+                    onChange={(event) => setAddForm((current) => ({ ...current, image: event.target.value }))}
+                    placeholder="https://..."
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="add-stock">Stock Quantity *</Label>
-                  <Input
-                    id="add-stock"
-                    type="number"
-                    min="0"
-                    step="1"
-                    value={addForm.stockQuantity}
-                    onChange={(event) =>
-                      setAddForm((current) => ({ ...current, stockQuantity: event.target.value }))
-                    }
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="add-status">Status</Label>
-                  <select
-                    id="add-status"
-                    value={addForm.status}
-                    onChange={(event) =>
-                      setAddForm((current) => ({ ...current, status: event.target.value as ProductStatus }))
-                    }
-                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                  >
-                    {PRODUCT_STATUSES.map((status) => (
-                      <option key={status} value={status}>
-                        {status}
-                      </option>
-                    ))}
-                  </select>
+
+                <div className="grid gap-4 sm:grid-cols-3">
+                  <div className="space-y-2">
+                    <Label htmlFor="add-price">Price (LKR) *</Label>
+                    <Input
+                      id="add-price"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={addForm.price}
+                      onChange={(event) => setAddForm((current) => ({ ...current, price: event.target.value }))}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="add-stock">Stock Quantity *</Label>
+                    <Input
+                      id="add-stock"
+                      type="number"
+                      min="0"
+                      step="1"
+                      value={addForm.stockQuantity}
+                      onChange={(event) =>
+                        setAddForm((current) => ({ ...current, stockQuantity: event.target.value }))
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="add-status">Status</Label>
+                    <select
+                      id="add-status"
+                      value={addForm.status}
+                      onChange={(event) =>
+                        setAddForm((current) => ({ ...current, status: event.target.value as ProductStatus }))
+                      }
+                      className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    >
+                      {PRODUCT_STATUSES.map((status) => (
+                        <option key={status} value={status}>
+                          {status}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div className="mt-6 flex items-center justify-end gap-3">
-              <Button variant="ghost" className="rounded-full" onClick={closeAddModal}>
-                Cancel
-              </Button>
-              <Button className="rounded-full" disabled={saving} onClick={() => void saveAdd()}>
-                {saving ? "Saving..." : "Add product"}
-              </Button>
+              <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-end">
+                <Button variant="ghost" className="rounded-full" onClick={closeAddModal}>
+                  Cancel
+                </Button>
+                <Button className="rounded-full" disabled={saving} onClick={() => void saveAdd()}>
+                  {saving ? "Saving..." : "Add product"}
+                </Button>
+              </div>
             </div>
           </div>
         </div>
