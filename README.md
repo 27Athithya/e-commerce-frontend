@@ -16,10 +16,10 @@ Next.js frontend for the e-commerce application.
 Create a `.env` file in the frontend root:
 
 ```dotenv
-NEXT_PUBLIC_API_URL=http://localhost:3001
+BACKEND_URL=https://your-backend.onrender.com
 ```
 
-If your project uses a different variable name in code, set that one instead.
+Set `BACKEND_URL` in Vercel to your Render backend URL. The app also falls back to `API_URL` or `NEXT_PUBLIC_API_URL` if you prefer those names.
 
 ## Install
 ```bash
