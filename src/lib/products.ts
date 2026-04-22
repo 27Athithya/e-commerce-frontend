@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
+const API_BASE_PATH = "/api";
 
 export const PRODUCT_STATUSES = ["draft", "active", "archived"] as const;
 export type ProductStatus = (typeof PRODUCT_STATUSES)[number];
@@ -81,7 +81,7 @@ function buildQueryString(filters?: ProductFilters) {
 }
 
 export async function getProducts(filters?: ProductFilters): Promise<Product[]> {
-  const response = await fetch(`${API_BASE_URL}/api/products${buildQueryString(filters)}`, {
+  const response = await fetch(`${API_BASE_PATH}/products${buildQueryString(filters)}`, {
     cache: "no-store",
   });
   if (!response.ok) {
@@ -93,7 +93,7 @@ export async function getProducts(filters?: ProductFilters): Promise<Product[]> 
 }
 
 export async function getProduct(id: string): Promise<Product> {
-  const response = await fetch(`${API_BASE_URL}/api/products/${id}`, { cache: "no-store" });
+  const response = await fetch(`${API_BASE_PATH}/products/${id}`, { cache: "no-store" });
   if (!response.ok) {
     throw new Error("Failed to load product");
   }
@@ -103,7 +103,7 @@ export async function getProduct(id: string): Promise<Product> {
 }
 
 export async function addProduct(productInput: ProductInput): Promise<Product> {
-  const response = await fetch(`${API_BASE_URL}/api/products`, {
+  const response = await fetch(`${API_BASE_PATH}/products`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -121,7 +121,7 @@ export async function addProduct(productInput: ProductInput): Promise<Product> {
 }
 
 export async function updateProduct(id: string, productInput: Partial<ProductInput>): Promise<Product> {
-  const response = await fetch(`${API_BASE_URL}/api/products/${id}`, {
+  const response = await fetch(`${API_BASE_PATH}/products/${id}`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
@@ -139,7 +139,7 @@ export async function updateProduct(id: string, productInput: Partial<ProductInp
 }
 
 export async function deleteProduct(id: string) {
-  const response = await fetch(`${API_BASE_URL}/api/products/${id}`, {
+  const response = await fetch(`${API_BASE_PATH}/products/${id}`, {
     method: "DELETE",
   });
 

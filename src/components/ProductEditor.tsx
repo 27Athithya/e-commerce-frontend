@@ -51,7 +51,7 @@ export function ProductEditor({
   }, [initialValues]);
 
   const categoryOptions = useMemo(() => {
-    const options = new Set(PRODUCT_CATEGORIES);
+    const options = new Set<string>(PRODUCT_CATEGORIES);
     const current = form.category.trim();
 
     if (current && !options.has(current)) {
